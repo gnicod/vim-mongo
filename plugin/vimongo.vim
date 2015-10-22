@@ -23,25 +23,22 @@ function! s:ShowResultsInSplit(text)
 
     " add results
     call append(0, split(a:text, "\n"))
+    normal! <CR>
     normal! gg
 endfunction
 
 function! MongoExecute() range
-    let cli_mongo_db = ""
-    if exists("g:mongo_db"):
-        let cli_mongo_db = g:mongo_db
-    else:
-        let cli_mongo_db = "test"
+    if !exists("g:cli_mongo_db"):
+        let g:cli_mongo_db = "test"
     endif
-    if !exists("g:mongo_username"):
-        let cli_mongo_username = ""
-    else:
+    if !exists("g:cli_mongo_username"):
         let cli_mongo_username = ""
     endif
-    if !exists("g:mongo_pass"):
+    if !exists("g:cli_mongo_pass"):
         let cli_mongo_pass = ""
-    else:
-        let cli_mongo_pass = ""
+    endif
+    if !exists("g:cli_mongo_host"):
+        let cli_mongo_host = "localhost"
     endif
 
     let lines = s:get_visual_selection()
@@ -50,6 +47,8 @@ function! MongoExecute() range
     redir > /tmp/vimmongo_
     echo  lines
     redir END
-    let out = system("mongo --quiet ".cli_mongo_db." < /tmp/vimmongo_")
+    let out = system("mongo --quiet --host ".g:cli_mongo_host." ".g:cli_mongo_db." < /tmp/vimmongo_")
     let res = s:ShowResultsInSplit(out)
 endfunction
+
+map <F5> :call MongoExecute()<CR>
